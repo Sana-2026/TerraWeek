@@ -33,6 +33,8 @@ Write short answers (in your blog/notes) to:
 terraform version
 terraform -help
 ```
+
+
 - Install the **HashiCorp Terraform** extension in VS Code for syntax highlighting and autocomplete.
 
 ### Task 3: Learn 6 Crucial Terraform Terminologies
