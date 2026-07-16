@@ -9,6 +9,8 @@ Explain (with examples) in your notes:
 - The difference between an **argument** and a **block**.
 - **Expressions**: string interpolation `"${...}"`, references (`resource.name.attr`), and operators.
 
+- **Completed in notes.md**
+
 ### Task 2: Variables, Types & Validation
 Create a `variables.tf` and define variables covering **each major type**:
 - Primitives: `string`, `number`, `bool`
