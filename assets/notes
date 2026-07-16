@@ -1,1 +1,331 @@
 
+
+
+
+
+# Terraform Notes – Blocks, Arguments & Expressions
+
+## 1. Anatomy of a Block
+
+A **block** is the basic building block of Terraform. It tells Terraform **what you want to configure or create**.
+
+### Syntax
+
+```hcl
+block_type "label_one" "label_two" {
+  argument = value
+}
+```
+
+### Breakdown
+
+| Part | Description | Example |
+|------|-------------|---------|
+| `block_type` | Type of block | `resource`, `provider`, `variable`, `output`, `module` |
+| `label_one` | Specifies the resource/type | `aws_instance` |
+| `label_two` | A unique name you choose | `web` |
+| `{}` | Contains the configuration | Arguments and nested blocks |
+
+### Example
+
+```hcl
+resource "aws_instance" "web" {
+  ami           = "ami-12345678"
+  instance_type = "t2.micro"
+}
+```
+
+### Visual
+
+```
+resource "aws_instance" "web" {
+│        │               │
+│        │               └── Resource Name
+│        └────────────────── Resource Type
+└─────────────────────────── Block Type
+```
+
+> **Easy Memory Trick**
+>
+> **Block = A container (📦) that holds configuration.**
+
+---
+
+# 2. Arguments vs Blocks
+
+## Argument
+
+An **argument** is a **key-value pair** that configures something.
+
+### Syntax
+
+```hcl
+name = value
+```
+
+### Example
+
+```hcl
+instance_type = "t2.micro"
+```
+
+Here,
+
+- `instance_type` → Argument
+- `"t2.micro"` → Value
+
+---
+
+## Block
+
+A **block** groups related configuration together.
+
+### Example
+
+```hcl
+resource "aws_instance" "web" {
+  ami           = "ami-12345678"
+  instance_type = "t2.micro"
+}
+```
+
+The whole `resource {}` section is a **block**.
+
+---
+
+## Nested Block Example
+
+Some blocks contain other blocks.
+
+```hcl
+resource "aws_instance" "web" {
+
+  ami = "ami-12345678"
+
+  root_block_device {
+    volume_size = 20
+  }
+
+}
+```
+
+Here,
+
+- `root_block_device` → Nested Block
+- `volume_size` → Argument inside the nested block
+
+---
+
+## Argument vs Block
+
+| Argument | Block |
+|-----------|-------|
+| Key = Value | Group of configuration |
+| Configures one setting | Defines an object |
+| No `{}` | Uses `{}` |
+| Example: `instance_type = "t2.micro"` | Example: `resource "aws_instance" "web" {}` |
+
+### Easy Memory Trick
+
+```
+House (Block)
+│
+├── Color = Blue        (Argument)
+├── Floors = 2          (Argument)
+└── Garage {            (Nested Block)
+      Capacity = 2
+   }
+```
+
+> **Block = House 🏠**
+>
+> **Arguments = Things inside the house 🪑**
+
+---
+
+# 3. Expressions
+
+Expressions allow Terraform to **calculate values** or **reference other resources** instead of hardcoding everything.
+
+---
+
+## 3.1 String Interpolation
+
+Used to insert a value inside a string.
+
+### Syntax
+
+```hcl
+"${...}"
+```
+
+### Example
+
+```hcl
+bucket = "${var.project_name}-bucket"
+```
+
+If
+
+```hcl
+project_name = "devops"
+```
+
+Terraform creates
+
+```
+devops-bucket
+```
+
+> **Note**
+>
+> Modern Terraform usually lets you write:
+>
+> ```hcl
+> bucket = var.project_name
+> ```
+>
+> `${}` is mainly used when combining text with variables.
+
+---
+
+## 3.2 References
+
+References let one resource use information from another resource.
+
+### Syntax
+
+```hcl
+resource_type.resource_name.attribute
+```
+
+### Example
+
+```hcl
+resource "aws_s3_bucket" "logs" {
+  bucket = "my-logs"
+}
+
+output "bucket_id" {
+  value = aws_s3_bucket.logs.id
+}
+```
+
+Terraform reads:
+
+> Get the **ID** of the S3 bucket named **logs**.
+
+---
+
+## 3.3 Operators
+
+Operators perform calculations or comparisons.
+
+### Arithmetic Operators
+
+| Operator | Meaning | Example | Result |
+|----------|---------|---------|--------|
+| `+` | Add | `2 + 3` | `5` |
+| `-` | Subtract | `8 - 2` | `6` |
+| `*` | Multiply | `3 * 4` | `12` |
+| `/` | Divide | `10 / 2` | `5` |
+| `%` | Modulus | `10 % 3` | `1` |
+
+---
+
+### Comparison Operators
+
+| Operator | Meaning | Example |
+|----------|---------|---------|
+| `==` | Equal | `5 == 5` |
+| `!=` | Not Equal | `5 != 4` |
+| `>` | Greater Than | `5 > 3` |
+| `<` | Less Than | `3 < 5` |
+| `>=` | Greater Than or Equal | `5 >= 5` |
+| `<=` | Less Than or Equal | `3 <= 5` |
+
+---
+
+### Logical Operators
+
+| Operator | Meaning | Example |
+|----------|---------|---------|
+| `&&` | AND | `true && false` |
+| `||` | OR | `true || false` |
+| `!` | NOT | `!true` |
+
+---
+
+# Cheat Sheet
+
+| Concept | Remember As |
+|----------|-------------|
+| Block | Container 📦 |
+| Argument | Setting inside the container ⚙️ |
+| Expression | Logic or calculation 🧠 |
+| Reference | Using another resource's value 🔗 |
+| String Interpolation | Insert variable into text 📝 |
+| Operator | Perform calculations or comparisons ➕ |
+
+---
+
+# Real Terraform Example
+
+```hcl
+provider "aws" {
+  region = "us-east-1"
+}
+
+resource "aws_instance" "web" {
+
+  ami           = "ami-12345678"
+  instance_type = "t2.micro"
+
+  tags = {
+    Name = "${var.project_name}-server"
+  }
+
+}
+```
+
+### Identify the Parts
+
+- `provider` → Block
+- `resource` → Block
+- `region` → Argument
+- `ami` → Argument
+- `instance_type` → Argument
+- `tags` → Argument
+- `${var.project_name}` → Expression (String Interpolation)
+
+---
+
+# Interview Summary
+
+### What is a Block?
+
+A container that defines a Terraform object such as a resource, provider, or variable.
+
+### What is an Argument?
+
+A key-value pair that configures a block.
+
+### What is an Expression?
+
+A way to calculate values or reference other resources instead of hardcoding them.
+
+### Difference Between Block and Argument
+
+- **Block** defines **what** you're creating.
+- **Argument** defines **how** it should be configured.
+
+---
+
+# One-Line Revision
+
+- **Block** → Defines an object.
+- **Argument** → Configures the object.
+- **Expression** → Calculates or references values.
+- **Reference** → Uses values from another resource.
+- **Interpolation** → Inserts variables into strings.
+- **Operators** → Perform calculations and comparisons.
